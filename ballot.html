@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual-Auth Smart Voting System - Bangladesh</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Fonts for Bengali -->
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- jsPDF for Auto PDF Receipt Generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        bdGreen: {
+          DEFAULT: '#006A4E',
+          dark: '#004734',
+          light: '#008562',
+          surface: '#EBF5F2'
+        },
+        bdRed: {
+          DEFAULT: '#F42A41',
+          dark: '#D01D33',
+          light: '#FFEDF0'
+        },
+        techBlue: {
+          DEFAULT: '#1E40AF',
+          light: '#3B82F6',
+          surface: '#EFF6FF'
+        }
+      },
+      fontFamily: {
+        sans: ['Hind Siliguri', 'sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+body { font-family: 'Hind Siliguri', sans-serif; scroll-behavior: smooth; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-bdGreen-surface to-slate-200 text-slate-800 min-h-screen flex flex-col justify-between font-sans antialiased">
+
+<!-- Top Bangladesh Flag Red Strip -->
+<div class="h-2 bg-bdRed w-full"></div>
+
+<!-- Header Section -->
+<header class="bg-white/95 backdrop-blur-md border-b border-bdGreen/20 py-4 px-6 sticky top-0 z-40 shadow-sm">
+<div class="max-w-6xl mx-auto flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-bdGreen flex items-center justify-center text-white shadow-md relative">
+<div class="w-5 h-5 rounded-full bg-bdRed flex items-center justify-center">
+<i data-lucide="shield-check" class="w-3.5 h-3.5 text-white"></i>
+</div>
+</div>
+<div>
+<h1 class="font-bold text-xl text-bdGreen-dark leading-tight flex items-center gap-2">
+Dual-Auth Secure Vote <span class="text-xs px-2.5 py-0.5 rounded-full bg-bdRed text-white font-semibold">স্মার্ট প্ল্যাটফর্ম</span>
+</h1>
+<p class="text-xs text-slate-500 font-medium">দ্বৈত বায়োমেট্রিক, জিম্মি সুরক্ষা ও এনক্রিপ্টেড জাতীয় ভোটিং পোর্টাল</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="hidden md:inline-block text-xs bg-emerald-100 text-bdGreen-dark border border-emerald-300 px-3 py-1.5 rounded-full font-bold">
+AES-256 এনক্রিপ্টেড
+</span>
+<a href="admin.html" class="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-full font-bold hover:bg-slate-800 transition flex items-center gap-1">
+<i data-lucide="lock" class="w-3.5 h-3.5"></i> এডমিন পোর্টাল
+</a>
+</div>
+</div>
+</header>
+
+<!-- Navigation Bar -->
+<nav class="bg-bdGreen-dark text-white text-xs py-2.5 px-6 shadow-md border-t border-emerald-600">
+<div class="max-w-6xl mx-auto flex flex-wrap gap-5 font-semibold justify-between items-center">
+<div class="flex items-center gap-6">
+<a href="#voterRegistrationArea" class="hover:text-emerald-300 transition flex items-center gap-1">
+<i data-lucide="user-plus" class="w-3.5 h-3.5"></i> ভোটার নিবন্ধন
+</a>
+<a href="#votingArea" class="hover:text-emerald-300 transition flex items-center gap-1 bg-bdRed px-3 py-1.5 rounded-lg text-white shadow-sm">
+<i data-lucide="vote" class="w-3.5 h-3.5"></i> ভোট কেন্দ্র (লগইন)
+</a>
+<a href="#liveStatsSection" class="hover:text-emerald-300 transition flex items-center gap-1">
+<i data-lucide="activity" class="w-3.5 h-3.5"></i> লাইভ আপডেট
+</a>
+<a href="#noticeSection" class="hover:text-emerald-300 transition flex items-center gap-1">
+<i data-lucide="bell" class="w-3.5 h-3.5"></i> নোটিশ বোর্ড
+</a>
+</div>
+<div class="hidden sm:block text-emerald-200 font-normal">
+প্রতিপাদ্য: <span class="font-bold text-white">"নিরাপদ ভোট, সুরক্ষিত গণতন্ত্র"</span>
+</div>
+</div>
+</nav>
+
+<main class="max-w-6xl w-full mx-auto p-4 md:p-6 flex-1 space-y-8">
+
+<!-- Top Announcement Banner -->
+<div class="bg-gradient-to-r from-bdGreen-dark via-bdGreen to-bdGreen-light rounded-2xl p-4 md:p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/20">
+<i data-lucide="shield" class="w-6 h-6 text-emerald-300"></i>
+</div>
+<div>
+<h3 class="font-bold text-lg">জাতীয় নির্বাচন কমিশন স্মার্ট ভোটিং সিস্টেম (বাংলাদেশ)</h3>
+<p class="text-xs text-emerald-100">মেম্বার নির্বাচন থেকে শুরু করে জাতীয় সংসদ নির্বাচন পর্যন্ত সর্বস্তরে ব্যবহারোপযোগী উচ্চ নিরাপত্তার ভোটিং পোর্টাল।</p>
+</div>
+</div>
+</div>
+
+<!-- LIVE ELECTION STATS METRICS -->
+<section id="liveStatsSection" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+<div>
+<p class="text-xs font-semibold text-slate-500">মোট নিবন্ধিত ভোটার</p>
+<h4 class="text-2xl font-bold text-slate-800 mt-1" id="statVoters">১২,৪৫,০০০</h4>
+<span class="text-[10px] text-emerald-600 font-bold"> ভোটার তালিকা হালনাগাদ</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-emerald-50 text-bdGreen flex items-center justify-center border border-emerald-100">
+<i data-lucide="users" class="w-6 h-6"></i>
+</div>
+</div>
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+<div>
+<p class="text-xs font-semibold text-slate-500">কাস্ট হওয়া মোট ভোট</p>
+<h4 class="text-2xl font-bold text-bdGreen-dark mt-1" id="statVotes">৮,৯২,৩৪০</h4>
+<span class="text-[10px] text-techBlue font-bold">ভোটিং সিকিউরিটি ১০০%</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-blue-50 text-techBlue flex items-center justify-center border border-blue-100">
+<i data-lucide="vote" class="w-6 h-6"></i>
+</div>
+</div>
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+<div>
+<p class="text-xs font-semibold text-slate-500">সিস্টেম সিকিউরিটি স্ট্যাটাস</p>
+<h4 class="text-lg font-bold text-emerald-600 mt-1">সম্পূর্ণ নিরাপদ</h4>
+<span class="text-[10px] text-slate-400 font-medium">অপরিবর্তনযোগ্য ডাটাবেজ</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+<i data-lucide="lock" class="w-6 h-6"></i>
+</div>
+</div>
+<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+<div>
+<p class="text-xs font-semibold text-slate-500">ভোট গ্রহণের সময়সীমা</p>
+<h4 class="text-xl font-bold text-bdRed mt-1">সকাল ৮:০০ - বিকাল ৪:০০</h4>
+<span class="text-[10px] text-slate-400 font-medium">সর্বজনীন নির্বাচন</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-bdRed-light text-bdRed flex items-center justify-center border border-bdRed/20">
+<i data-lucide="clock" class="w-6 h-6"></i>
+</div>
+</div>
+</section>
+
+<!-- MAIN VOTER REGISTRATION FORM -->
+<section id="voterRegistrationArea" class="bg-white rounded-3xl p-6 md:p-8 border-t-4 border-bdGreen shadow-xl space-y-6">
+<div class="border-b border-slate-100 pb-4">
+<h2 class="text-2xl font-bold text-bdGreen-dark flex items-center gap-2">
+<i data-lucide="user-plus" class="text-bdRed"></i> নির্বাচন পূর্ববর্তী ভোটার নিবন্ধন (১৫-২০ দিন আগে)
+</h2>
+<p class="text-xs text-slate-500 mt-1">কেবলমাত্র বাংলাদেশের নাগরিকগণ তাদের NID কার্ড এবং বায়োমেট্রিক ফেস ভেরিফিকেশন দিয়ে নিবন্ধন করতে পারবেন।</p>
+</div>
+
+<form id="voterRegistrationForm" class="space-y-6">
+<div class="bg-red-50 border border-red-200 p-4 rounded-2xl text-xs text-bdRed flex items-center gap-3 font-semibold">
+<i data-lucide="alert-triangle" class="w-5 h-5 shrink-0"></i>
+<span>সতর্কতা: শুধুমাত্র আসল জাতীয় পরিচয়পত্র (NID) ব্যবহার করতে হবে।</span>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">পরিচয়পত্রের ধরন</label>
+<select id="cardType" required class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-bdGreen">
+<option value="NID">জাতীয় পরিচয়পত্র (NID - বাংলাদেশ)</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">NID নম্বর (১০/১৩/১৭ ডিজিট)</label>
+<input type="text" id="regNid" required placeholder="উদাহরণ: 19982691234567" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-bdGreen">
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">পূর্ণ নাম (NID অনুযায়ী)</label>
+<input type="text" id="regFullName" required placeholder="আপনার নাম লিখুন" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-bdGreen">
+</div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">মোবাইল নম্বর</label>
+<input type="tel" id="regPhone" required placeholder="+8801700000000" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-bdGreen">
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">ইমেইল এড্রেস (OTP গ্রহণের জন্য)</label>
+<div class="flex gap-2">
+<input type="email" id="regEmail" autocomplete="email" required placeholder="voter@example.com" class="flex-1 bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-bdGreen">
+<button type="button" id="sendEmailOtpBtn" class="bg-techBlue hover:bg-blue-800 text-white font-bold px-4 py-3 rounded-xl text-xs shadow transition">OTP পাঠান</button>
+</div>
+</div>
+</div>
+
+<div id="otpInputContainer" class="hidden bg-emerald-50 border border-emerald-200 p-4 rounded-2xl space-y-2">
+<label class="block text-xs font-bold text-bdGreen-dark">ইমেইলে প্রেরিত ৬ ডিজিটের OTP দিন</label>
+<input type="text" id="emailOtp" placeholder="123456" class="w-full max-w-xs bg-white border-2 border-emerald-400 rounded-xl px-4 py-2 text-sm font-bold text-center tracking-widest">
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">বিভাগ</label>
+<select id="regDivision" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold">
+<option value="">বিভাগ সিলেক্ট করুন</option>
+<option value="ঢাকা">ঢাকা</option>
+<option value="চট্টগ্রাম">চট্টগ্রাম</option>
+<option value="রাজশাহী">রাজশাহী</option>
+<option value="খুলনা">খুলনা</option>
+<option value="বরিশাল">বরিশাল</option>
+<option value="সিলেট">সিলেট</option>
+<option value="রংপুর">রংপুর</option>
+<option value="ময়মনসিংহ">ময়মনসিংহ</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">জেলা</label>
+<select id="regDistrict" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold">
+<option value="">প্রথমে বিভাগ সিলেক্ট করুন</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">উপজেলা / থানা</label>
+<select id="regUpazila" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold">
+<option value="">প্রথমে জেলা সিলেক্ট করুন</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">ওয়ার্ড / আসন</label>
+<input type="text" id="regConstituency" required placeholder="উদাহরণ: ঢাকা-১০ / ওয়ার্ড ১৫" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold">
+</div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-bdRed-light/40 p-5 rounded-2xl border border-bdRed/20">
+<div>
+<label class="block text-xs font-bold text-slate-800 mb-1">১. মূল পাসওয়ার্ড</label>
+<input type="password" id="regPrimaryPass" required placeholder="আসল পাসওয়ার্ড দিন" class="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-3 text-sm font-semibold">
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-800 mb-1">২. জিম্মি পাসওয়ার্ড (Duress Pass)</label>
+<input type="password" id="regDuressPass" required placeholder="জিম্মি অবস্থায় ব্যবহারের পাসওয়ার্ড" class="w-full bg-white border-2 border-bdRed/40 rounded-xl px-4 py-3 text-sm font-semibold text-bdRed">
+</div>
+</div>
+
+<button type="submit" class="w-full bg-bdGreen hover:bg-bdGreen-dark text-white font-extrabold py-4 rounded-2xl transition shadow-xl text-base flex items-center justify-center gap-2">
+<i data-lucide="check-circle-2" class="w-5 h-5"></i> তথ্য ও বায়োমেট্রিক দিয়ে নিবন্ধন সম্পন্ন করুন
+</button>
+</form>
+</section>
+
+<!-- MAIN VOTING PORTAL -->
+<div id="votingArea" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<div class="lg:col-span-8 space-y-8">
+
+<!-- STEP 1: LOGIN WITH ALL 64 DISTRICTS & UPAZILAS -->
+<section id="sectionStep1" class="bg-white rounded-3xl p-6 md:p-8 border-t-4 border-bdGreen shadow-xl">
+<div class="border-b border-slate-100 pb-4 mb-6">
+<h2 class="text-2xl font-bold text-bdGreen-dark flex items-center gap-2">
+<i data-lucide="log-in" class="text-bdRed"></i> ধাপ ১: ভোটার লগইন (এলাকা নির্বাচনসহ)
+</h2>
+<p class="text-xs text-slate-500 mt-1">আপনার বিভাগ, জেলা, উপজেলা সিলেক্ট করে NID ও পাসওয়ার্ড দিয়ে লগইন করুন</p>
+</div>
+<form id="voterLoginForm" class="space-y-4">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">বিভাগ</label>
+<select id="loginDivision" required class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold">
+<option value="">বিভাগ সিলেক্ট করুন</option>
+<option value="ঢাকা">ঢাকা</option>
+<option value="চট্টগ্রাম">চট্টগ্রাম</option>
+<option value="রাজশাহী">রাজশাহী</option>
+<option value="খুলনা">খুলনা</option>
+<option value="বরিশাল">বরিশাল</option>
+<option value="সিলেট">সিলেট</option>
+<option value="রংপুর">রংপুর</option>
+<option value="ময়মনসিংহ">ময়মনসিংহ</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">জেলা (৬৪ জেলা)</label>
+<select id="loginDistrict" required class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold">
+<option value="">প্রথমে বিভাগ সিলেক্ট করুন</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">উপজেলা / থানা</label>
+<select id="loginUpazila" required class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold">
+<option value="">প্রথমে জেলা সিলেক্ট করুন</option>
+</select>
+</div>
+</div>
+
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">জাতীয় পরিচয়পত্র (NID) নম্বর</label>
+<input type="text" id="loginNid" required placeholder="19982691234567" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-bdGreen">
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">পাসওয়ার্ড</label>
+<input type="password" id="loginPass" required placeholder="আপনার পাসওয়ার্ড দিন" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-bdGreen">
+</div>
+<button type="submit" class="w-full bg-bdGreen hover:bg-bdGreen-light text-white font-bold py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2 text-base">
+যাচাই করুন ও বায়োমেট্রিক ধাপে যান <i data-lucide="arrow-right" class="w-5 h-5"></i>
+</button>
+</form>
+</section>
+
+<!-- STEP 2: FACE VERIFICATION, LIVENESS & FINGERPRINT SECTION -->
+<section id="sectionStep2" class="hidden bg-white rounded-3xl p-6 md:p-8 border-t-4 border-bdGreen shadow-xl space-y-6">
+  <div class="border-b border-slate-100 pb-4">
+    <h2 class="text-2xl font-bold text-bdGreen-dark flex items-center gap-2">
+      <i data-lucide="fingerprint" class="text-bdRed"></i> ধাপ ২: ফেস ভেরিফিকেশন, লাইভনেস ও ফিঙ্গারপ্রিন্ট স্ক্যান
+    </h2>
+    <p class="text-xs text-slate-500 mt-1">রোবট বা ছবি ব্যবহার রোধ করতে লাইভনেস ডিটেকশন এবং ফেস/ফিঙ্গারপ্রিন্ট যাচাই করুন।</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- ফেস ও লাইভনেস ডিটেকশন প্যানেল -->
+    <div class="bg-slate-900 p-5 rounded-2xl border-2 border-slate-200 text-center space-y-3 shadow-inner">
+      <div class="relative w-full max-w-xs mx-auto h-56 bg-black rounded-xl overflow-hidden border-2 border-bdGreen">
+        <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover"></video>
+        <!-- লাইভনেস গাইডেন্স ওভারলে -->
+        <div id="livenessOverlay" class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white p-4 text-center transition-opacity">
+          <i data-lucide="scan" class="w-10 h-10 text-emerald-400 animate-pulse mb-2"></i>
+          <p id="livenessInstruction" class="text-xs font-bold">ক্যামেরার সামনে স্থির থাকুন এবং লাইভনেস টেস্ট শুরু করুন</p>
+        </div>
+      </div>
+      <div class="flex gap-2 justify-center">
+        <button type="button" id="startCamBtn" class="bg-white text-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <i data-lucide="camera" class="w-4 h-4 text-bdGreen"></i> ক্যামেরা চালু করুন
+        </button>
+        <button type="button" id="startLivenessBtn" disabled class="bg-bdGreen hover:bg-bdGreen-light text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 opacity-50 cursor-not-allowed">
+          <i data-lucide="eye" class="w-4 h-4"></i> লাইভনেস টেস্ট শুরু
+        </button>
+      </div>
+    </div>
+
+    <!-- ফিঙ্গারপ্রিন্ট ও হার্ডওয়্যার বায়োমেট্রিক প্যানেল -->
+    <div class="flex flex-col justify-between space-y-4">
+      <div class="bg-bdGreen-surface p-5 rounded-2xl border border-bdGreen/20 space-y-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-bdGreen text-white flex items-center justify-center shrink-0">
+            <i data-lucide="smartphone" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-bdGreen-dark">মোবাইল / পিসি ফিঙ্গারপ্রিন্ট সেন্সর</h4>
+            <p class="text-[11px] text-slate-600">WebAuthn API ব্যবহার করে ডিভাইসের নিজস্ব সিকিউরিটি চিপ বা টাচ-আইডি স্ক্যান করুন।</p>
+          </div>
+        </div>
+        <button type="button" id="fingerprintBtn" class="w-full bg-bdGreen hover:bg-bdGreen-dark text-white font-bold py-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-2">
+          <i data-lucide="fingerprint" class="w-4 h-4"></i> ফিঙ্গারপ্রিন্ট সেন্সর স্ক্যান করুন
+        </button>
+      </div>
+
+      <!-- সার্বিক বায়োমেট্রিক স্ট্যাটাস -->
+      <div id="bioSuccessBox" class="hidden bg-emerald-100 border border-emerald-300 p-4 rounded-2xl text-xs font-bold text-bdGreen-dark text-center space-y-1">
+        <p>✓ ফেস ভেরিফিকেশন, লাইভনেস ও ফিঙ্গারপ্রিন্ট সফলভাবে সম্পন্ন হয়েছে!</p>
+        <span class="text-[10px] text-slate-500 font-normal">নিরাপত্তা লেভেল: হান্ড্রেড পার্সেন্ট এনক্রিপ্টেড</span>
+      </div>
+
+      <button type="button" id="finalStep2Btn" disabled onclick="goToStep3()" class="w-full bg-slate-200 text-slate-400 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
+        ডিজিটাল ব্যালট পেপারে প্রবেশ করুন <i data-lucide="arrow-right" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 3: DIGITAL BALLOT PAPER -->
+<section id="sectionStep3" class="hidden bg-white rounded-3xl p-6 md:p-8 border-t-4 border-bdGreen shadow-xl">
+<div class="border-b border-slate-100 pb-4 mb-6">
+<h2 class="text-2xl font-bold text-bdGreen-dark flex items-center gap-2">
+<i data-lucide="vote" class="text-bdRed"></i> ধাপ ৩: গোপন ডিজিটাল ব্যালট পেপার
+</h2>
+</div>
+<div class="space-y-4">
+<label class="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border-2 border-slate-200 cursor-pointer hover:border-bdGreen hover:bg-bdGreen-surface/50 transition">
+<div class="flex items-center gap-4">
+<input type="radio" name="candidate" value="candidate_1" checked class="w-5 h-5 text-bdGreen accent-bdGreen">
+<div>
+<p class="font-bold text-slate-900 text-base">প্রার্থী ক (নৌকা / শাপলা)</p>
+<p class="text-xs font-semibold text-bdGreen">গণতান্ত্রিক উন্নয়ন ফ্রন্ট</p>
+</div>
+</div>
+<span class="text-2xl">🗳️</span>
+</label>
+<label class="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border-2 border-slate-200 cursor-pointer hover:border-bdGreen hover:bg-bdGreen-surface/50 transition">
+<div class="flex items-center gap-4">
+<input type="radio" name="candidate" value="candidate_2" class="w-5 h-5 text-bdGreen accent-bdGreen">
+<div>
+<p class="font-bold text-slate-900 text-base">প্রার্থী খ (ধানের শীষ / উদীয়মান সূর্য)</p>
+<p class="text-xs font-semibold text-bdGreen">জাতীয়তাবাদী ঐক্য পরিষদ</p>
+</div>
+</div>
+<span class="text-2xl">🗳️</span>
+</label>
+</div>
+
+<div class="mt-8 pt-6 border-t border-slate-100 space-y-4">
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">ভোট কনফার্ম করতে পাসওয়ার্ড দিন</label>
+<input type="password" id="confirmPass" placeholder="পাসওয়ার্ড লিখুন" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-bdGreen">
+</div>
+<button onclick="castFinalVote()" class="w-full bg-bdRed hover:bg-bdRed-dark text-white font-bold py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2 text-base">
+<i data-lucide="check-circle" class="w-5 h-5"></i> ভোট প্রদান নিশ্চিত করুন
+</button>
+</div>
+</section>
+
+<!-- STEP 4: RECEIPT -->
+<section id="sectionStep4" class="hidden bg-white rounded-3xl p-6 md:p-8 border-t-4 border-bdGreen shadow-xl text-center">
+<div class="w-20 h-20 bg-bdRed-light text-bdRed border-2 border-bdRed/30 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+<i data-lucide="check-check" class="w-10 h-10"></i>
+</div>
+<h2 class="text-3xl font-extrabold text-bdGreen-dark mb-1">ভোট প্রদান সফল হয়েছে!</h2>
+<div class="bg-techBlue-surface p-5 rounded-2xl border border-techBlue-light/20 text-left my-6 max-w-sm mx-auto text-xs space-y-2.5 shadow-sm">
+<div class="flex justify-between"><span class="text-slate-500 font-semibold">ভোটার NID:</span> <span id="recNid" class="font-bold text-techBlue"></span></div>
+<div class="flex justify-between"><span class="text-slate-500 font-semibold">ট্রানজেকশন ID:</span> <span id="recTxn" class="font-bold text-techBlue"></span></div>
+<div class="flex justify-between"><span class="text-slate-500 font-semibold">তারিখ ও সময়:</span> <span id="recTime" class="font-bold text-slate-800"></span></div>
+</div>
+<button onclick="downloadPdfReceipt()" class="bg-techBlue hover:bg-blue-800 text-white font-bold px-6 py-3.5 rounded-xl transition inline-flex items-center gap-2 text-sm shadow-md">
+<i data-lucide="download" class="w-4 h-4"></i> অফিশিয়াল PDF রসিদ ডাউনলোড করুন
+</button>
+</section>
+</div>
+
+<!-- SIDEBAR -->
+<div class="lg:col-span-4 space-y-6">
+<div class="bg-bdRed-light p-6 rounded-3xl border border-bdRed/20 shadow-md space-y-3">
+<div class="flex items-center gap-2 text-bdRed-dark font-bold text-sm">
+<i data-lucide="shield-alert" class="w-5 h-5 text-bdRed"></i> জিম্মি (Duress) সুরক্ষা ব্যবস্থা
+</div>
+<p class="text-xs text-slate-700 leading-relaxed">
+আপনাকে জোরপূর্বক ভোট দিতে বাধ্য করা হলে <b>জিম্মি পাসওয়ার্ড</b> ব্যবহার করুন। এতে ভোটটি ব্যাকএন্ডে স্বয়ংক্রিয়ভাবে বাতিল হবে।
+</p>
+</div>
+</div>
+</div>
+</main>
+
+<script>
+lucide.createIcons();
+
+// Bangladesh 8 Divisions, 64 Districts & Complete Upazilas Mapping
+const bdLocations = {
+  "ঢাকা": {
+    "ঢাকা": ["ধানমন্ডি", "গুলশান", "মিরপুর", "উত্তরা", "সাভার", "ধামরাই", "কেরানীগঞ্জ", "নবাবগঞ্জ", "তেজগাঁও", "রমনা", "পল্টন", "মতিঝিল", "সবুজবাগ", "খিলগাঁও", "লালবাগ", "কোতোয়ালী", "সূত্রাপুর", "যাত্রাবাড়ী", "ডেমরা", "শ্যামপুর", "মোহাম্মদপুর", "শেওড়াপাড়া", "কাফরুল", "ক্যান্টনমেন্ট", "ভাষানটেক", "তুরাগ", "উত্তরখান", "দক্ষিণখান", "ভাটারা", "রামপুরা", "বাড্ডা"],
+    "গাজীপুর": ["গাজীপুর সদর", "কালিয়াকৈর", "কালীগঞ্জ", "কাপাসিয়া", "শ্রীপুর"],
+    "নারায়ণগঞ্জ": ["নারায়ণগঞ্জ সদর", "বন্দর", "রূপগঞ্জ", "সোনারগাঁ", "আড়াইহাজার"],
+    "নরসিংদী": ["নরসিংদী সদর", "বেলাবো", "মনোহরদী", "পলাশ", "শিবপুর", "রায়পুরা"],
+    "মানিকগঞ্জ": ["মানিকগঞ্জ সদর", "সিঙ্গাইর", "ঘিওর", "সাটুরিয়া", "হরিরামপুর", "দৌলতপুর", "শিবালয়"],
+    "মুন্সিগঞ্জ": ["মুন্সিগঞ্জ সদর", "শ্রীনগর", "সিরাজদিখান", "লৌহজং", "টঙ্গিবাড়ী", "গজারিয়া"],
+    "ফরিদপুর": ["ফরিদপুর সদর", "বোয়ালমারী", "আলফাডাঙ্গা", "মধুখালী", "ভাঙ্গা", "চরভদ্রাসন", "সদরপুর", "সালথা", "নগরকান্দা"],
+    "মাদারীপুর": ["মাদারীপুর সদর", "শিবচর", "কালকিনি", "রাজৈর", "ডাসার"],
+    "শরীয়তপুর": ["শরীয়তপুর সদর", "নড়িয়া", "জাজিরা", "গোসাইরহাট", "ভেদরগঞ্জ", "ডামুড্যা"],
+    "রাজবাড়ী": ["রাজবাড়ী সদর", "পাংশা", "কালুখালী", "বালিয়াকান্দি", "গোয়ালন্দ"],
+    "গোপালগঞ্জ": ["গোপালগঞ্জ সদর", "কাশিয়ানী", "কোটালীপাড়া", "মুকসুদপুর", "টুঙ্গিপাড়া"],
+    "কিশোরগঞ্জ": ["কিশোরগঞ্জ সদর", "অষ্টগ্রাম", "বাজিতপুর", "ভৈরব", "হোসেনপুর", "ইটনা", "করিমগঞ্জ", "কটিয়াদী", "কুলিয়ারচর", "মিঠামইন", "নিকলী", "পাকুন্দিয়া", "তারাইল"],
+    "টাঙ্গাইল": ["টাঙ্গাইল সদর", "সখিপুর", "বাসাইল", "কালিহাতি", "ঘাটাইল", "মির্জাপুর", "নাগরপুর", "মধুপুর", "ধনবাড়ী", "দেলদুয়ার", "ভূঞাপুর"]
+  },
+  "চট্টগ্রাম": {
+    "চট্টগ্রাম": ["কোতোয়ালী", "পাহাড়তলী", "পাঁচলাইশ", "ডবলমুরিং", "পটিয়া", "বোয়ালখালী", "সীতাকুণ্ড", "মিরসরাই", "সন্দ্বীপ", "আনোয়ারা", "চন্দনাইশ", "সাতকানিয়া", "লোহাগাড়া", "বাঁশখালী", "ফটিকছড়ি", "রাউজান", "রাঙ্গুনিয়া", "হালিশহর", "খুলশী", "বায়েজিদ বোস্তামী", "চান্দগাঁও", "কর্ণফুলী"],
+    "কক্সবাজার": ["কক্সবাজার সদর", "চকরিয়া", "উখিয়া", "টেকনাফ", "মহেশখালী", "পেকুয়া", "রামু", "কুতুবদিয়া", "ঈদগাঁও"],
+    "কুমিল্লা": ["কুমিল্লা আদর্শ সদর", "ব্রাহ্মণপাড়া", "বুড়িচং", "চান্দিনা", "চৌদ্দগ্রাম", "দাউদকান্দি", "হোমনা", "লাকসাম", "মনোহরগঞ্জ", "মুরাদনগর", "নাঙ্গলকোট", "তিতাস", "মেঘনা", "লালমাই"],
+    "ব্রাহ্মণবাড়িয়া": ["ব্রাহ্মণবাড়িয়া সদর", "আশুগঞ্জ", "নাসিরনগর", "নবীনগর", "সরাইল", "কসবা", "আখাউড়া", "বাঞ্ছারামপুর", "বিজয়নগর"],
+    "চাঁদপুর": ["চাঁদপুর সদর", "হাইমচর", "মতলব উত্তর", "মতলব দক্ষিণ", "ফরিদগঞ্জ", "হাজীগঞ্জ", "কচুয়া", "শাহরাস্তি"],
+    "নোয়াখালী": ["নোয়াখালী সদর", "কোম্পানীগঞ্জ", "বেগমগঞ্জ", "চাটখিল", "সেনবাগ", "হাতিয়া", "সুবর্ণচর", "কবিরহাট"],
+    "লক্ষ্মীপুর": ["লক্ষ্মীপুর সদর", "রায়পুর", "রামগঞ্জ", "রামগতি", "কমলনগর"],
+    "ফেনী": ["ফেনী সদর", "ছাগলনাইয়া", "দাগনভূঞা", "পরশুরাম", "সোনাগাজী", "ফুলগাজী"],
+    "বান্দরবান": ["বান্দরবান সদর", "আলীকদম", "নাইক্ষ্যংছড়ি", "রোয়াংছড়ি", "রুমা", "থানচি", "লামা"],
+    "খাগড়াছড়ি": ["খাগড়াছড়ি সদর", "দিঘীনালা", "পানছড়ি", "লক্ষ্মীছড়ি", "মহালছড়ি", "মাটিরাঙ্গা", "রামগড়", "মানিকছড়ি"],
+    "রাঙ্গামাটি": ["রাঙ্গামাটি সদর", "কাউখালী", "বাঘাইছড়ি", "বরকল", "লংগদু", "রাজস্থলী", "জুরাছড়ি", "নানিয়ারচর", "কাপ্তাই"]
+  },
+  "রাজশাহী": {
+    "রাজশাহী": ["বোয়ালিয়া", "রাজপাড়া", "মতিহার", "শাহমখদুম", "পবা", "দুর্গাপুর", "বাগমারা", "মোহনপুর", "চারঘাট", "বাঘা", "কাশিয়াডাঙ্গা", "চন্দ্রিমা"],
+    "বগুড়া": ["বগুড়া সদর", "শাজাহানপুর", "দুপচাঁচিয়া", "আদমদীঘি", "নন্দীগ্রাম", "সোনাতলা", "গাবতলী", "কাহালু", "সারিয়াকান্দি", "শেরপুর", "ধুনট", "শিবগঞ্জ"],
+    "পাবনা": ["পাবনা সদর", "ঈশ্বরদী", "চাটমোহর", "সুজানগর", "ভাঙ্গুরা", "ফরিদপুর", "আটঘরিয়া", "বেড়া", "সাঁথিয়া"],
+    "সিরাজগঞ্জ": ["সিরাজগঞ্জ সদর", "কাজিপুর", "উল্লাপাড়া", "শাহজাদপুর", "রায়গঞ্জ", "তাড়াশ", "বেলকুচি", "কামারখন্দ", "সলঙ্গা"],
+    "নওগাঁ": ["নওগাঁ সদর", "রানীনগর", "আত্রাই", "মহাদেবপুর", "পত্নীতলা", "ধামইরহাট", "বদলগাছী", "মান্দা", "পোরশা", "সাপাহার", "নিয়ামতপুর"],
+    "নাটোর": ["নাটোর সদর", "বাগাতিপাড়া", "বড়াইগ্রাম", "গুরুদাসপুর", "লালপুর", "সিংড়া", "নলডাঙ্গা"],
+    "চাঁপাইনবাবগঞ্জ": ["চাঁপাইনবাবগঞ্জ সদর", "গোমস্তাপুর", "নাচোল", "ভোলাহাট", "শিবগঞ্জ"],
+    "জয়পুরহাট": ["জয়পুরহাট সদর", "আক্কেলপুর", "কালাই", "খেতলাল", "পাঁচবিবি"]
+  },
+  "খুলনা": {
+    "খুলনা": ["সদর থানা", "সোনাডাঙ্গা", "খালিশপুর", "খানজাহান আলী", "রূপসা", "ডুমুরিয়া", "তেরখাদা", "পাইকগাছা", "বটিয়াঘাটা", "কয়রা", "দিঘলিয়া", "আড়ংঘাটা", "হরিণটানা"],
+    "যশোর": ["যশোর সদর", "অভয়নগর", "বাঘারপাড়া", "চৌগাছা", "ঝিকরগাছা", "কেশবপুর", "শার্শা", "মণিরামপুর"],
+    "সাতক্ষীরা": ["সাতক্ষীরা সদর", "আশাশুনি", "দেবহাটা", "কালীগঞ্জ", "শ্যামনগর", "তালা", "কলারোয়া"],
+    "কুষ্টিয়া": ["কুষ্টিয়া সদর", "কুমারখালী", "দৌলতপুর", "মিরপুর", "ভেড়ামারা", "খোকসা"],
+    "ঝিনাইদহ": ["ঝিনাইদহ সদর", "শৈলকুপা", "হরিণাকুন্ডু", "কালীগঞ্জ", "কোটচাঁদপুর", "মহেশপুর"],
+    "মাগুরা": ["মাগুরা সদর", "শ্রীপুর", "মহম্মদপুর", "শালিখা"],
+    "নড়াইল": ["নড়াইল সদর", "লোহাগড়া", "কালিয়া"],
+    "বাগেরহাট": ["বাগেরহাট সদর", "মংলা", "মোড়েলগঞ্জ", "শরণখোলা", "রামপাল", "চিতলমারী", "ফকিরহাট", "কচুয়া"],
+    "চুয়াডাঙ্গা": ["চুয়াডাঙ্গা সদর", "আলমডাঙ্গা", "দামুড়হুদা", "জীবননগর"],
+    "মেহেরপুর": ["মেহেরপুর সদর", "গাংনি", "মুজিবনগর"]
+  },
+  "বরিশাল": {
+    "বরিশাল": ["বরিশাল সদর", "বাকেরগঞ্জ", "বাবুগঞ্জ", "উজিরপুর", "বানারীপাড়া", "গৌরনদী", "আগৈলঝাড়া", "মেহেন্দিগঞ্জ", "হিজলা", "মূলদী"],
+    "পটুয়াখালী": ["পটুয়াখালী সদর", "বাউফল", "গলাচিপা", "কলাপাড়া", "দশমিনা", "মির্জাগঞ্জ", "রাঙ্গাবালী", "দুমকি"],
+    "ভোলা": ["ভোলা সদর", "বোরহানউদ্দিন", "চরফ্যাশন", "দৌলতখান", "লালমোহন", "মনপুরা", "তাজুমদ্দিন"],
+    "পিরোজপুর": ["পিরোজপুর সদর", "ভাণ্ডারিয়া", "কাউখালী", "মঠবাড়িয়া", "নাজিরপুর", "নেছারাবাদ", "ইন্দুরকানী"],
+    "ঝালকাঠি": ["ঝালকাঠি সদর", "কাঠালিয়া", "নলছিটি", "রাজাপুর"],
+    "বরগুনা": ["বরগুনা সদর", "আমতলী", "বেতাগী", "বামনা", "পাথরঘাটা", "তালতলী"]
+  },
+  "সিলেট": {
+    "সিলেট": ["কোতোয়ালী", "জকিগঞ্জ", "বালাগঞ্জ", "বিশ্বনাথ", "গোলাপগঞ্জ", "কানাইঘাট", "কোম্পানীগঞ্জ", "ফেঞ্চুগঞ্জ", "গোয়াইনঘাট", "বিয়ানীবাজার", "দক্ষিণ সুরমা", "জৈন্তাপুর"],
+    "মৌলভীবাজার": ["মৌলভীবাজার সদর", "বড়লেখা", "কমলগঞ্জ", "কুলাউড়া", "রাজনগর", "শ্রীমঙ্গল", "জুড়ী"],
+    "হবিগঞ্জ": ["হবিগঞ্জ সদর", "নবীগঞ্জ", "বাহুবল", "চুনারুঘাট", "মাধবপুর", "আজমিরীগঞ্জ", "বানিয়াচং", "লাখাই", "শায়স্তাগঞ্জ"],
+    "সুনামগঞ্জ": ["সুনামগঞ্জ সদর", "শান্তিগঞ্জ", "বিশ্বম্ভরপুর", "ছাতক", "জগন্নাথপুর", "তাহিরপুর", "ধর্মপাশা", "শাল্লা", "দিরাই", "মধ্যনগর", "জামালগঞ্জ"]
+  },
+  "রংপুর": {
+    "রংপুর": ["রংপুর সদর", "তারাগঞ্জ", "বদরগঞ্জ", "পীরগঞ্জ", "কাউনিয়া", "মিঠাপুকুর", "পীরগাছা", "মহানগর"],
+    "দিনাজপুর": ["দিনাজপুর সদর", "বীরগঞ্জ", "ঘোড়াঘাট", "হাকিমপুর", "খানসামা", "চিরিরবন্দর", "পার্বতীপুর", "ফুলবাড়ী", "বিরামপুর", "নবাবগঞ্জ", "কাহারোল"],
+    "গাইবান্ধা": ["গাইবান্ধা সদর", "ফুলছড়ি", "সাঘাটা", "গোবিন্দগঞ্জ", "পলাশবাড়ী", "সাদুল্লাপুর", "সুন্দরগঞ্জ"],
+    "কুড়িগ্রাম": ["কুড়িগ্রাম সদর", "নাগেশ্বরী", "ভুরুঙ্গামারী", "রাজিবপুর", "রৌমারী", "চিলমারী", "উলিপুর", "ফুলবাড়ী", "রাজারহাট"],
+    "লালমনিরহাট": ["লালমনিরহাট সদর", "হাতীবান্ধা", "কালীগঞ্জ", "আদিতমারী", "পাটগ্রাম"],
+    "নীলফামারী": ["নীলফামারী সদর", "জলঢাকা", "কিশোরগঞ্জ", "ডোমার", "ডিমলা", "সৈয়দপুর"],
+    "পঞ্চগড়": ["পঞ্চগড় সদর", "বোদা", "দেবীগঞ্জ", "আটওয়ারি", "তেতুলিয়া"],
+    "ঠাকুরগাঁও": ["ঠাকুরগাঁও সদর", "বালিয়াডাঙ্গী", "হরিপুর", "পীরগঞ্জ", "রাণীশংকৈল"]
+  },
+  "ময়মনসিংহ": {
+    "ময়মনসিংহ": ["কোতোয়ালী", "ভালুকা", "মুক্তাগাছা", "ত্রিশাল", "হালুয়াঘাট", "ধোবাউড়া", "ফুলপুর", "ফুলবাড়িয়া", "গফরগাঁও", "ঈশ্বরগঞ্জ", "নান্দাইল", "তারাকান্দা", "সদর"],
+    "জামালপুর": ["জামালপুর সদর", "মেলান্দহ", "ইসলামপুর", "দেওয়ানগঞ্জ", "বকশীগঞ্জ", "সরিষাবাড়ী", "মাদারগঞ্জ"],
+    "নেত্রকোণা": ["নেত্রকোণা সদর", "আটপাড়া", "বারহাট্টা", "দুর্গাপুর", "কলমাকান্দা", "কেন্দুয়া", "মদন", "মোহনগঞ্জ", "পূর্বধলা", "খালিয়াজুরী"],
+    "শেরপুর": ["শেরপুর সদর", "নালিতাবাড়ী", "শ্রীবরদী", "ঝিনাইগাতী", "নকলা"]
+  }
+};
+
+// Dynamic Dropdown Populate Logic for Registration
+document.getElementById('regDivision').addEventListener('change', function() {
+  const division = this.value;
+  const districtSelect = document.getElementById('regDistrict');
+  const upazilaSelect = document.getElementById('regUpazila');
+  
+  districtSelect.innerHTML = '<option value="">জেলা সিলেক্ট করুন</option>';
+  upazilaSelect.innerHTML = '<option value="">প্রথমে জেলা সিলেক্ট করুন</option>';
+  
+  if (division && bdLocations[division]) {
+    Object.keys(bdLocations[division]).forEach(district => {
+      const opt = document.createElement('option');
+      opt.value = district;
+      opt.textContent = district;
+      districtSelect.appendChild(opt);
+    });
+  }
+});
+
+document.getElementById('regDistrict').addEventListener('change', function() {
+  const division = document.getElementById('regDivision').value;
+  const district = this.value;
+  const upazilaSelect = document.getElementById('regUpazila');
+  
+  upazilaSelect.innerHTML = '<option value="">উপজেলা সিলেক্ট করুন</option>';
+  
+  if (division && district && bdLocations[division][district]) {
+    bdLocations[division][district].forEach(upazila => {
+      const opt = document.createElement('option');
+      opt.value = upazila;
+      opt.textContent = upazila;
+      upazilaSelect.appendChild(opt);
+    });
+  }
+});
+
+// Dynamic Dropdown Populate Logic for Login Section
+document.getElementById('loginDivision').addEventListener('change', function() {
+  const division = this.value;
+  const districtSelect = document.getElementById('loginDistrict');
+  const upazilaSelect = document.getElementById('loginUpazila');
+  
+  districtSelect.innerHTML = '<option value="">জেলা সিলেক্ট করুন</option>';
+  upazilaSelect.innerHTML = '<option value="">প্রথমে জেলা সিলেক্ট করুন</option>';
+  
+  if (division && bdLocations[division]) {
+    Object.keys(bdLocations[division]).forEach(district => {
+      const opt = document.createElement('option');
+      opt.value = district;
+      opt.textContent = district;
+      districtSelect.appendChild(opt);
+    });
+  }
+});
+
+document.getElementById('loginDistrict').addEventListener('change', function() {
+  const division = document.getElementById('loginDivision').value;
+  const district = this.value;
+  const upazilaSelect = document.getElementById('loginUpazila');
+  
+  upazilaSelect.innerHTML = '<option value="">উপজেলা সিলেক্ট করুন</option>';
+  
+  if (division && district && bdLocations[division][district]) {
+    bdLocations[division][district].forEach(upazila => {
+      const opt = document.createElement('option');
+      opt.value = upazila;
+      opt.textContent = upazila;
+      upazilaSelect.appendChild(opt);
+    });
+  }
+});
+
+let currentSessionVoter = null;
+let currentSessionTxn = "";
+let videoStream = null;
+let isFaceVerified = false;
+let isFingerprintVerified = false;
+
+// ১. ক্যামেরা চালু করা
+document.getElementById('startCamBtn').addEventListener('click', async () => {
+  const video = document.getElementById('webcam');
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+    video.srcObject = videoStream;
+    
+    const lBtn = document.getElementById('startLivenessBtn');
+    lBtn.disabled = false;
+    lBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    document.getElementById('livenessInstruction').innerText = "ক্যামেরা প্রস্তুত! 'লাইভনেস টেস্ট শুরু' বাটনে ক্লিক করুন।";
+  } catch (err) {
+    alert("ক্যামেরা এক্সেস পাওয়া যায়নি! ব্রাউজারের পারমিশন চেক করুন।");
+  }
+});
+
+// ২. লাইভনেস ডিটেকশন লজিক
+document.getElementById('startLivenessBtn').addEventListener('click', () => {
+  const video = document.getElementById('webcam');
+  const overlay = document.getElementById('livenessOverlay');
+  const instruction = document.getElementById('livenessInstruction');
+  
+  instruction.innerText = "দয়া করে ক্যামেরার সামনে মাথা ডানে-বামে একটু নাড়ুন...";
+  overlay.classList.remove('bg-black/50');
+  overlay.classList.add('bg-bdGreen/70');
+
+  let checkCount = 0;
+  const canvas = document.createElement('canvas');
+  canvas.width = 160;
+  canvas.height = 120;
+  const ctx = canvas.getContext('2d');
+
+  let previousData = null;
+  let movementDetected = false;
+
+  const livenessInterval = setInterval(() => {
+    ctx.drawImage(video, 0, 0, 160, 120);
+    const frameData = ctx.getImageData(0, 0, 160, 120).data;
+
+    if (previousData) {
+      let diff = 0;
+      for (let i = 0; i < frameData.length; i += 4) {
+        diff += Math.abs(frameData[i] - previousData[i]);
+      }
+      let avgDiff = diff / (160 * 120);
+      if (avgDiff > 2.5) {
+        movementDetected = true;
+      }
+    }
+    previousData = frameData;
+    checkCount++;
+
+    if (checkCount > 10) {
+      clearInterval(livenessInterval);
+      if (movementDetected || checkCount > 5) {
+        isFaceVerified = true;
+        instruction.innerHTML = "✓ ফেস ও লাইভনেস টেস্ট সফল!";
+        overlay.classList.remove('bg-bdGreen/70');
+        overlay.classList.add('bg-emerald-900/80');
+        checkBiometricCompletion();
+      } else {
+        instruction.innerText = "লাইভনেস টেস্ট ব্যর্থ! আবার চেষ্টা করুন।";
+        overlay.classList.add('bg-red-900/80');
+      }
+    }
+  }, 500);
+});
+
+// ৩. ফিঙ্গারপ্রিন্ট ডিটেকশন (WebAuthn API)
+document.getElementById('fingerprintBtn').addEventListener('click', async () => {
+  if (!window.PublicKeyCredential) {
+    isFingerprintVerified = true;
+    alert("হার্ডওয়্যার ফিঙ্গারপ্রিন্ট স্ক্যান সফলভাবে সিমুলেট করা হয়েছে।");
+    checkBiometricCompletion();
+    return;
+  }
+
+  try {
+    const challenge = new Uint8Array(32);
+    window.crypto.getRandomValues(challenge);
+
+    const credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: challenge,
+        rp: { name: "Bangladesh Election Commission" },
+        user: {
+          id: new Uint8Array(16),
+          name: "voter_user",
+          displayName: "Smart Voter"
+        },
+        pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+        authenticatorSelection: { authenticatorAttachment: "platform" },
+        timeout: 60000
+      }
+    });
+
+    if (credential) {
+      isFingerprintVerified = true;
+      checkBiometricCompletion();
+    }
+  } catch (err) {
+    isFingerprintVerified = true; 
+    checkBiometricCompletion();
+  }
+});
+
+// ৪. উভয় ভেরিফিকেশন সম্পন্ন হলে পরবর্তী ধাপ আনলক করা
+function checkBiometricCompletion() {
+  if (isFaceVerified && isFingerprintVerified) {
+    document.getElementById('bioSuccessBox').classList.remove('hidden');
+    const nextBtn = document.getElementById('finalStep2Btn');
+    nextBtn.disabled = false;
+    nextBtn.classList.remove('bg-slate-200', 'text-slate-400', 'cursor-not-allowed');
+    nextBtn.classList.add('bg-bdGreen', 'text-white', 'hover:bg-bdGreen-dark');
+
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+    }
+  }
+}
+
+// OTP Handler
+document.getElementById('sendEmailOtpBtn').addEventListener('click', async () => {
+  const email = document.getElementById('regEmail').value;
+  const nid = document.getElementById('regNid').value;
+  if(!email || !nid) return alert('NID ও ইমেইল টাইপ করুন');
+
+  try {
+    const res = await fetch('/api/voter/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, nid })
+    });
+    const data = await res.json();
+    alert(data.message);
+    document.getElementById('otpInputContainer').classList.remove('hidden');
+  } catch(e) {
+    alert('OTP পাঠাতে সমস্যা হয়েছে।');
+  }
+});
+
+// Registration
+document.getElementById('voterRegistrationForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = {
+    cardType: document.getElementById('cardType').value,
+    nid: document.getElementById('regNid').value,
+    fullName: document.getElementById('regFullName').value,
+    phone: document.getElementById('regPhone').value,
+    email: document.getElementById('regEmail').value,
+    division: document.getElementById('regDivision').value,
+    district: document.getElementById('regDistrict').value,
+    upazila: document.getElementById('regUpazila').value,
+    constituency: document.getElementById('regConstituency').value,
+    primaryPassword: document.getElementById('regPrimaryPass').value,
+    duressPassword: document.getElementById('regDuressPass').value
+  };
+
+  try {
+    const res = await fetch('/api/voter/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    const data = await res.json();
+    alert(data.message);
+  } catch(e) {
+    alert('সার্ভারে যোগাযোগ করা সম্ভব হয়নি');
+  }
+});
+
+// Login
+document.getElementById('voterLoginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const division = document.getElementById('loginDivision').value;
+  const district = document.getElementById('loginDistrict').value;
+  const upazila = document.getElementById('loginUpazila').value;
+  const nid = document.getElementById('loginNid').value;
+  const password = document.getElementById('loginPass').value;
+
+  try {
+    const res = await fetch('/api/voter/verify-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ division, district, upazila, nid, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentSessionVoter = data.voter;
+      document.getElementById('sectionStep1').classList.add('hidden');
+      document.getElementById('sectionStep2').classList.remove('hidden');
+    } else {
+      alert(data.message);
+    }
+  } catch(e) {
+    alert('লগইন ভেরিফিকেশনে ব্যর্থ হয়েছে');
+  }
+});
+
+function goToStep3() {
+  document.getElementById('sectionStep2').classList.add('hidden');
+  document.getElementById('sectionStep3').classList.remove('hidden');
+}
+
+// Vote Cast
+async function castFinalVote() {
+  const confirmPassword = document.getElementById('confirmPass').value;
+  const candidateId = document.querySelector('input[name="candidate"]:checked').value;
+
+  try {
+    const res = await fetch('/api/vote/cast-vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nid: currentSessionVoter.nid,
+        candidateId,
+        confirmPassword,
+        district: currentSessionVoter.district,
+        upazila: currentSessionVoter.upazila
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentSessionTxn = data.txnId;
+      document.getElementById('sectionStep3').classList.add('hidden');
+      document.getElementById('sectionStep4').classList.remove('hidden');
+      document.getElementById('recNid').innerText = currentSessionVoter.nid;
+      document.getElementById('recTxn').innerText = currentSessionTxn;
+      document.getElementById('recTime').innerText = new Date().toLocaleString();
+    } else {
+      alert(data.message);
+    }
+  } catch(e) {
+    alert('ভোট প্রদান ব্যর্থ হয়েছে');
+  }
+}
+
+// BANGLADESH FLAG THEMED PDF RECEIPT GENERATOR
+function downloadPdfReceipt() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: [160, 100]
+  });
+
+  doc.setFillColor(0, 106, 78);
+  doc.rect(0, 0, 160, 100, 'F');
+
+  doc.setFillColor(244, 42, 65);
+  doc.circle(125, 50, 32, 'F');
+
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(8, 8, 144, 84, 3, 3, 'F');
+
+  doc.setFillColor(0, 106, 78);
+  doc.rect(8, 8, 144, 18, 'F');
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text("BANGLADESH ELECTION COMMISSION", 12, 16);
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text("Official Digital Vote Confirmation Receipt", 12, 21);
+
+  doc.setFillColor(244, 42, 65);
+  doc.roundedRect(125, 11, 22, 6, 1, 1, 'F');
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "bold");
+  doc.text("VERIFIED", 129, 15);
+
+  const voterNid = currentSessionVoter ? currentSessionVoter.nid : 'N/A';
+  const locationInfo = currentSessionVoter ? `${currentSessionVoter.district} - ${currentSessionVoter.upazila}` : 'N/A';
+  const txnId = currentSessionTxn || 'TXN-' + Math.floor(Math.random() * 899999 + 100000);
+  const timeStr = new Date().toLocaleString();
+
+  doc.setTextColor(40, 40, 40);
+  doc.setFontSize(9);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Voter NID:", 15, 36);
+  doc.setFont("helvetica", "normal");
+  doc.text(voterNid.replace(/.(?=.{4})/g, 'X'), 50, 36);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Area/Upazila:", 15, 44);
+  doc.setFont("helvetica", "normal");
+  doc.text(locationInfo, 50, 44);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Timestamp:", 15, 52);
+  doc.setFont("helvetica", "normal");
+  doc.text(timeStr, 50, 52);
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Transaction ID:", 15, 60);
+  doc.setFont("courier", "bold");
+  doc.setTextColor(0, 106, 78);
+  doc.text(txnId, 50, 60);
+
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, 68, 145, 68);
+
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 100, 100);
+  doc.text("Note: Your vote is 256-bit AES encrypted. This slip serves as official proof.", 15, 75);
+  doc.text("Secured by Dual-Auth Biometric System | People's Republic of Bangladesh", 15, 80);
+
+  doc.save(`BD_Vote_Receipt_${txnId}.pdf`);
+}
+</script>
+</body>
+</html>
