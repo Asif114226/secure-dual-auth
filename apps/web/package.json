@@ -1,0 +1,1 @@
+{"name":"@secure-voting/web","private":true,"scripts":{"dev":"vite","build":"vite build","preview":"vite preview","test":"vitest run","lint":"eslint ."},"dependencies":{"@vitejs/plugin-react":"^5.0.2","react":"^19.1.1","react-dom":"^19.1.1","typescript":"^5.9.2","vite":"^7.1.4"},"devDependencies":{"vitest":"^3.2.4"}}

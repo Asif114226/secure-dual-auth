@@ -1,0 +1,12 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") directUrl = env("DIRECT_URL") }
+enum Role { VOTER ADMIN ELECTION_OFFICER AUDITOR }
+enum VerificationStatus { PENDING VERIFIED REJECTED }
+enum ElectionStatus { DRAFT SCHEDULED OPEN PAUSED CLOSED }
+enum AuditSeverity { INFO WARN CRITICAL }
+model User { id String @id @default(cuid()) nidHash String @unique fullName String email String? phone String? passwordHash String duressPinHash String role Role @default(VOTER) verificationStatus VerificationStatus @default(PENDING) biometricCredentialId String? hasVoted Boolean @default(false) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt votes Vote[] auditLogs AuditLog[] @@index([role, verificationStatus]) }
+model Election { id String @id @default(cuid()) name String startsAt DateTime endsAt DateTime status ElectionStatus @default(DRAFT) version Int @default(1) candidates Candidate[] votes Vote[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Candidate { id String @id @default(cuid()) electionId String name String symbol String? ballotOrder Int election Election @relation(fields:[electionId], references:[id], onDelete:Cascade) votes Vote[] @@unique([electionId, ballotOrder]) }
+model Vote { id String @id @default(cuid()) electionId String voterId String candidateId String? encryptedPayload String receiptHash String @unique previousHash String? createdAt DateTime @default(now()) election Election @relation(fields:[electionId], references:[id]) voter User @relation(fields:[voterId], references:[id]) candidate Candidate? @relation(fields:[candidateId], references:[id]) @@unique([electionId, voterId]) @@index([electionId, createdAt]) }
+model AuditLog { id String @id @default(cuid()) actorId String? action String severity AuditSeverity @default(INFO) metadata Json previousHash String? entryHash String @unique createdAt DateTime @default(now()) actor User? @relation(fields:[actorId], references:[id]) @@index([createdAt, severity]) }
+model Notice { id String @id @default(cuid()) title String body String publishedAt DateTime? expiresAt DateTime? createdAt DateTime @default(now()) }
