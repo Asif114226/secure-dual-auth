@@ -1,0 +1,16 @@
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import crypto from "node:crypto";
+import {PrismaClient} from "@prisma/client";
+import pinoHttp from "pino-http";
+import {z} from "zod";
+const app=express(),db=new PrismaClient();
+app.use(helmet({contentSecurityPolicy:false}));app.use(cors({origin:process.env.CORS_ORIGIN?.split(",")??false,credentials:true}));app.use(express.json({limit:"256kb"}));app.use(pinoHttp());
+const hash=(v:string)=>crypto.createHash("sha256").update(v).digest("hex");
+const voteSchema=z.object({electionId:z.string().min(1),candidateId:z.string().min(1),duressPin:z.string().min(4).max(64)});
+app.get("/health",(_,res)=>res.json({ok:true,service:"secure-dual-auth-api"}));
+app.get("/api/elections/:id",async(req,res)=>{const e=await db.election.findUnique({where:{id:req.params.id},include:{candidates:{orderBy:{ballotOrder:"asc"}}}});if(!e)return res.status(404).json({error:"Election not found"});res.json(e)});
+app.post("/api/votes",async(req,res)=>{const p=voteSchema.safeParse(req.body);if(!p.success)return res.status(400).json({error:"Invalid request"});const {electionId,candidateId,duressPin}=p.data;const voterId=String(req.headers["x-voter-id"]??"");if(!voterId)return res.status(401).json({error:"Authenticated voter required"});const e=await db.election.findUnique({where:{id:electionId}});if(!e||e.status!=="OPEN")return res.status(409).json({error:"Election is not open"});const voter=await db.user.findUnique({where:{id:voterId}});if(!voter||voter.hasVoted)return res.status(409).json({error:"Voter is not eligible"});const duress=hash(duressPin)===voter.duressPinHash;const last=await db.vote.findFirst({where:{electionId},orderBy:{createdAt:"desc"}});const payload=Buffer.from(JSON.stringify({candidateId:duress?"DISCARD":candidateId,createdAt:new Date().toISOString()})).toString("base64url");const receiptHash=hash(JSON.stringify({payload,previousHash:last?.receiptHash??null}));await db.$transaction([db.vote.create({data:{electionId,voterId,candidateId:duress?null:candidateId,encryptedPayload:payload,receiptHash,previousHash:last?.receiptHash}}),db.user.update({where:{id:voterId},data:{hasVoted:true}})]);res.status(201).json({receiptHash,duressHandled:duress})});
+app.use((err:unknown,_req:express.Request,res:express.Response,_next:express.NextFunction)=>res.status(500).json({error:"Internal server error"}));
+const port=Number(process.env.PORT??3000);app.listen(port,()=>console.log("API listening on",port));
